@@ -1,4 +1,14 @@
 <script>
+	import { ethers } from "ethers";
+
+	let linkpool = "https://main-rpc.linkpool.io/";
+	const connection = new ethers.providers.JsonRpcProvider(linkpool);
+
+	if (connection) {
+		const gas_price = connection.getGasPrice();
+		
+	}
+
 	// get current domain
 	let domain = window.location.hostname;
 
@@ -6,7 +16,7 @@
 
 	function load_data() {
 		if (domain === "opensea.io") {
-			// find the current NFT and add out content
+			// find the current NFT and add our information
 			let articles = document.getElementsByTagName('article');
 			for (let i = 0; i < articles.length; i++) {
 				let article = articles[i];
@@ -15,6 +25,7 @@
 					let article_children = article.childNodes;
 					let found_div = false;
 					for (let j = 0; j < article_children.length; j++) {
+						// make sure we're only adding the info once
 						if (article_children[j] && article_children[j].className === 'RareView_AssetInfo--grid') {
 							found_div = true;
 							break;
