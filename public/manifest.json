@@ -14,7 +14,6 @@
     {
       "matches": ["<all_urls>"],
       "js": ["build/bundle.js"],
-      "css": ["build/bundle.css"],
       "run_at": "document_end"
     }
   ]
