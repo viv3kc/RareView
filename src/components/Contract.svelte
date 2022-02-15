@@ -1,6 +1,7 @@
 <script>
 	import { ethers } from "ethers";
 	import { onMount, afterUpdate } from 'svelte';
+	import { rareFetch } from '../static/rare_view_management';
 
 	export let contract = undefined;
 	export let collection_name = undefined;
@@ -10,15 +11,32 @@
 		// fetch data from solidity contract
 	}
 
+	async function get_collection_data() {
+		if (collection_name) {
+			let api = "https://api.opensea.io/api/v1/collection/" + collection_name;
+			let collection_obj = await rareFetch(api);
+			if (collection_obj) {
+				let collection_address = collection_obj.primary_asset_contracts[0];
+				let collection_traits = collection_obj.traits;
+				let collection_stats = collection_obj.stats;
+				let total_collection_count = collection_stats.count;
+			}
+		}
+	}
+
 	onMount(() => {
 		if (contract) {
 			get_contract_data();
+		} else {
+			get_collection_data();
 		}
 	})
 
 	afterUpdate(() => {
 		if (contract) {
 			get_contract_data();
+		} else {
+			get_collection_data();
 		}
 	});
 
