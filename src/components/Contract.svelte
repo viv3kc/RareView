@@ -7,19 +7,72 @@
 	export let collection_name = undefined;
 	export let token_id = undefined;
 
+	const alchemy = "https://eth-mainnet.alchemyapi.io/v2/A8RlXYDE-mEf5JidAgy7jSkzLcnVgB3L";
+	const contract_abi = JSON.parse(`[
+			{
+				"inputs": [],
+				"name": "name",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "tokenURI",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+	]`);
+
 	function get_contract_data() {
 		// fetch data from solidity contract
 	}
 
+	function get_collection_from_contract(local_contract) {
+		// get collection data from smart contract.
+		const provider = new ethers.providers.JsonRpcProvider(alchemy);
+		if (provider) {
+			let contract_obj  = new ethers.Contract(local_contract, contract_abi, provider);
+			
+		}
+	}
+
 	async function get_collection_data() {
+		// get collection data from opensea.
 		if (collection_name) {
 			let api = "https://api.opensea.io/api/v1/collection/" + collection_name;
 			let collection_obj = await rareFetch(api);
 			if (collection_obj) {
-				let collection_address = collection_obj.primary_asset_contracts[0];
+				collection_obj = collection_obj.collection;
+				let primary_asset = collection_obj.primary_asset_contracts[0];
+				let collection_address;
 				let collection_traits = collection_obj.traits;
 				let collection_stats = collection_obj.stats;
 				let total_collection_count = collection_stats.count;
+				
+				if (primary_asset) {
+					collection_address = primary_asset.address;
+				}
+				if (collection_address) get_collection_from_contract(collection_address);
 			}
 		}
 	}
@@ -40,42 +93,6 @@
 		}
 	});
 
-	// const alchemy = "https://eth-mainnet.alchemyapi.io/v2/A8RlXYDE-mEf5JidAgy7jSkzLcnVgB3L";
-	// const provider = new ethers.providers.JsonRpcProvider(alchemy);
-	// const contract_abi = JSON.parse(`[
-	// 		{
-	// 			"inputs": [],
-	// 			"name": "name",
-	// 			"outputs": [
-	// 				{
-	// 					"internalType": "string",
-	// 					"name": "",
-	// 					"type": "string"
-	// 				}
-	// 			],
-	// 			"stateMutability": "view",
-	// 			"type": "function"
-	// 		},
-	// 		{
-	// 			"inputs": [
-	// 				{
-	// 					"internalType": "uint256",
-	// 					"name": "",
-	// 					"type": "uint256"
-	// 				}
-	// 			],
-	// 			"name": "tokenURI",
-	// 			"outputs": [
-	// 				{
-	// 					"internalType": "string",
-	// 					"name": "",
-	// 					"type": "string"
-	// 				}
-	// 			],
-	// 			"stateMutability": "view",
-	// 			"type": "function"
-	// 		}
-	// ]`);
 
 	// if (provider) {
 	// 		let contract = new ethers.Contract(contract_name, contract_abi, provider);
