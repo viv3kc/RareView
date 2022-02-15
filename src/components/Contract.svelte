@@ -52,7 +52,11 @@
 		const provider = new ethers.providers.JsonRpcProvider(alchemy);
 		if (provider) {
 			let contract_obj  = new ethers.Contract(local_contract, contract_abi, provider);
-			
+			// contract_obj.getLogs({
+			// 	fromBlock: 0,
+			// 	toBlock: "latest",
+			// 	address: this.contract.address
+			// });
 		}
 	}
 
