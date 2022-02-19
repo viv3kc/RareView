@@ -1,49 +1,14 @@
 <script>
-	import { afterUpdate } from 'svelte';
+	import { onMount, afterUpdate } from 'svelte';
 	import { get_data_from_chrome, chrome_data_exist, get_collection_address, store_entire_collection } from '../static/CollectionManagement.js';
 	import Rarity from './Rarity.svelte';
+	import { collection_data } from '../static/Store.js';
 
 	export let contract = undefined;
 	export let collection_name = undefined;
 	export let token_id = undefined;
-
-	const alchemy_api = "https://eth-mainnet.alchemyapi.io/v2/A8RlXYDE-mEf5JidAgy7jSkzLcnVgB3L";
-	const contract_abi = JSON.parse(`[
-			{
-				"inputs": [],
-				"name": "name",
-				"outputs": [
-					{
-						"internalType": "string",
-						"name": "",
-						"type": "string"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"name": "tokenURI",
-				"outputs": [
-					{
-						"internalType": "string",
-						"name": "",
-						"type": "string"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			}
-	]`);
 	
-	async function structure_data() {
+	async function generate_collection_data_from_opensea() {
 		if (contract) {
 			// check if collection already exists in chrome
 			// if not extract name from contract and store the entire collection.
@@ -74,10 +39,11 @@
 			store_entire_collection(collection_name);
 		}
 	}
-
+	onMount(() => {
+		collection_data.set(generate_collection_data_from_opensea());
+	});
 	afterUpdate(() => {
-		let data = structure_data();
-		console.log(data)
+		collection_data.set(generate_collection_data_from_opensea());
 	});
 
 
@@ -164,3 +130,7 @@
 	
 	// load_data();
 </script>
+
+<Rarity
+	{token_id}
+/>

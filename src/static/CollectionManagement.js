@@ -1,30 +1,30 @@
 import { get_collection_assets, get_nft_meta_data } from './FetchData.js';
 
-function get_collection_from_opensea(collection_name) {
-  let api = "https://api.opensea.io/api/v1/collection/" + collection_name;
+function get_collection_from_opensea(_collection_name) {
+  let api = "https://api.opensea.io/api/v1/collection/" + _collection_name;
   return fetch(api).then(res => res.json());
 }
 
-function save_data_in_chrome(obj) {
+function save_data_in_chrome(_obj) {
   // stores data in chrome.storage
-  chrome.storage.local.set(obj);
+  chrome.storage.local.set(_obj);
 }
 
-export function get_data_from_chrome(key) {
+export function get_data_from_chrome(_key) {
   // retrieve data from chrome.storage
-  return chrome.storage.local.get(key);
+  return chrome.storage.local.get(_key);
 }
 
-export async function chrome_data_exist(key) {
-  let data = await get_data_from_chrome(key);
+export async function chrome_data_exist(_key) {
+  let data = await get_data_from_chrome(_key);
   let keys = Object.keys(data);
   return keys.length > 0 ? true : false;
 }
 
-async function get_collection_data(collection_name) {
+async function get_collection_data(_collection_name) {
   // get collection data from opensea.
-  if (! collection_name) return;
-  let collection_obj = await get_collection_from_opensea(collection_name);
+  if (! _collection_name) return;
+  let collection_obj = await get_collection_from_opensea(_collection_name);
   if (! collection_obj) return;
 
   collection_obj = collection_obj.collection;
@@ -49,8 +49,8 @@ async function get_collection_data(collection_name) {
   };
 }
 
-export async function get_collection_address(collection_name) {
-  let contract_data = await get_collection_data(collection_name);
+export async function get_collection_address(_collection_name) {
+  let contract_data = await get_collection_data(_collection_name);
   
   if (! contract_data) return;
   if (! contract_data.hasOwnProperty("token_ids")) return;
@@ -58,8 +58,8 @@ export async function get_collection_address(collection_name) {
   return contract_data;
 }
 
-export async function store_entire_collection (collection_name) {
-  let contract_data = await get_collection_address(collection_name);
+export async function store_entire_collection (_collection_name) {
+  let contract_data = await get_collection_address(_collection_name);
   
   // check if collection already exists in chrome
   // if not store it.
@@ -82,9 +82,9 @@ export async function store_entire_collection (collection_name) {
   save_data_in_chrome(obj);
 }
 
-async function get_contract_meta_data(contract_address, id) {
+async function get_contract_meta_data(_contract_address, _id) {
   // fetch data from solidity contract
-  let token_data = await get_nft_meta_data(contract_address, id);
+  let token_data = await get_nft_meta_data(_contract_address, _id);
   let metadata = token_data.metadata;
   metadata.id = token_data.id.tokenId;
   return metadata;
