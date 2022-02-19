@@ -1,7 +1,7 @@
 <script>
 	import { ethers } from "ethers";
 	import { onMount, afterUpdate } from 'svelte';
-	import { get_collection_from_opensea, get_collection_assets } from '../static/FetchData';
+	import { get_collection_from_opensea, get_collection_assets, get_nft_meta_data } from '../static/FetchData';
 
 	export let contract = undefined;
 	export let collection_name = undefined;
@@ -66,7 +66,22 @@
 				if (schema_name !== "ERC721") return;
 				if (collection_address) {
 					let all_collection_ids = await get_collection_assets(collection_address, total_collection_count);
-					console.log(all_collection_ids);
+					let all_token_data = [];
+					all_collection_ids.forEach(id => {
+						all_token_data.push(get_nft_meta_data(collection_address, id));
+					});
+					if (all_token_data.length === 0)  return;
+					let token_data = await Promise.allSettled(all_token_data);
+					let token_metadata = token_data.map(t_data => {
+						if (t_data.status === "fulfilled") {
+							let token_value = t_data.value;
+							if (token_value.hasOwnProperty("metadata")) {
+								let meta_data = token_value.metadata;
+								meta_data.id = token_value.id.tokenId;
+								return meta_data;
+							}
+						}
+					});
 				}
 			}
 		}

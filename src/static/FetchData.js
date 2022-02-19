@@ -1,5 +1,3 @@
-import { rareFetch } from "./RareFetch.js";
-
 const alchemy_api = "https://eth-mainnet.alchemyapi.io/v2/A8RlXYDE-mEf5JidAgy7jSkzLcnVgB3L";
 const nft_abi = JSON.parse(`[
   {
@@ -36,10 +34,9 @@ const nft_abi = JSON.parse(`[
   }
 ]`);
 
-export async function get_collection_from_opensea(collection_name) {
+export function get_collection_from_opensea(collection_name) {
   let api = "https://api.opensea.io/api/v1/collection/" + collection_name;
-  let obj = await rareFetch(api);
-  return obj;
+  return fetch(api).then(res => res.json());
 }
 
 function get_tx_history(contract, page_key) {
@@ -97,7 +94,7 @@ export async function get_collection_assets(contract, total_collection) {
   let token_ids = [];
   while(total_collection > nft_counter ) {
     let request_options = get_tx_history(contract, page_key);
-    let data = await rareFetch(alchemy_api, request_options);
+    let data = await fetch(alchemy_api, request_options).then(res => res.json());
     if (! data) return;
 
     let result = data.result;
@@ -117,4 +114,14 @@ export async function get_collection_assets(contract, total_collection) {
     }
   }
   return token_ids;
+}
+
+export function get_nft_meta_data(contract, token_id, token_type = "erc721") {
+  const baseURL = alchemy_api + "/getNFTMetadata";
+  const url = `${baseURL}?contractAddress=${contract}&tokenId=${token_id}&tokenType=${token_type}`;
+  let requestOptions = {
+    method: 'GET',
+    redirect: 'follow'
+  };
+  return fetch(url, requestOptions).then(res => res.json());
 }
