@@ -1,6 +1,6 @@
 <script>
 	import { afterUpdate } from 'svelte';
-	import { get_collection_data, chrome_data_exist, save_collection_data, get_contract_data } from '../static/CollectionManagement.js';
+	import { get_data_from_chrome, chrome_data_exist, get_collection_address, store_entire_collection } from '../static/CollectionManagement.js';
 	import Rarity from './Rarity.svelte';
 
 	export let contract = undefined;
@@ -48,7 +48,7 @@
 			// check if collection already exists in chrome
 			// if not extract name from contract and store the entire collection.
 			let found_data_in_chrome = await chrome_data_exist(contract);
-			if (found_data_in_chrome) return;
+			if (found_data_in_chrome) return get_data_from_chrome(contract);
 			
 			// let's find the name of the collection from opensea
 			let contract_name;
@@ -59,17 +59,25 @@
 				let c_node = collection_div_children[i].getAttribute('href');
 				if (c_node) {
 					contract_name = c_node.replace('/collection', '').split(/[/?#]/)[1];
+					break;
 				}
 			}
 			if (! contract_name) return;
-			save_collection_data(contract_name);
+			store_entire_collection(contract_name);
 		} else {
-			save_collection_data(collection_name);
+			let contract_data = await get_collection_address(collection_name);
+			let address = contract_data.address;
+			// check if collection already exists in chrome
+			let found_data_in_chrome = await chrome_data_exist(address);
+			if (found_data_in_chrome) return get_data_from_chrome(address);
+			
+			store_entire_collection(collection_name);
 		}
 	}
 
 	afterUpdate(() => {
-		structure_data();
+		let data = structure_data();
+		console.log(data)
 	});
 
 
