@@ -1,7 +1,6 @@
 <script>
 	import { afterUpdate } from 'svelte';
-	import { get_nft_meta_data } from '../static/FetchData';
-	import { get_collection_data } from '../static/CollectionManagement.js';
+	import { get_collection_data, chrome_data_exist, save_collection_data, get_contract_data } from '../static/CollectionManagement.js';
 	import Rarity from './Rarity.svelte';
 
 	export let contract = undefined;
@@ -46,23 +45,27 @@
 	
 	async function structure_data() {
 		if (contract) {
-			get_contract_data(contract, token_id);
+			// check if collection already exists in chrome
+			// if not extract name from contract and store the entire collection.
+			let found_data_in_chrome = await chrome_data_exist(contract);
+			if (found_data_in_chrome) return;
+			
+			// let's find the name of the collection from opensea
+			let contract_name;
+			let collection_detail = document.querySelector(".item--collection-detail");
+			let collection_detail_div = collection_detail.childNodes[0];
+			let collection_div_children = collection_detail_div.childNodes;
+			for (let i = 0; i < collection_div_children.length; i++) {
+				let c_node = collection_div_children[i].getAttribute('href');
+				if (c_node) {
+					contract_name = c_node.replace('/collection', '').split(/[/?#]/)[1];
+				}
+			}
+			if (! contract_name) return;
+			save_collection_data(contract_name);
 		} else {
-			let contract_data = await get_collection_data(collection_name);
-			if (! contract_data) return;
-			if (! contract_data.hasOwnProperty("token_ids")) return;
-			if (! contract_data.hasOwnProperty("address")) return;
-
-			get_contract_data(contract_data.address, contract_data.token_ids);
+			save_collection_data(collection_name);
 		}
-	}
-	async function get_contract_data(contract_address, id) {
-		// fetch data from solidity contract
-		let token_data = await get_nft_meta_data(contract_address, id);
-		let metadata = token_data.metadata;
-		metadata.id = token_data.id.tokenId;
-		metadata.address = contract_address;
-		return metadata;
 	}
 
 	afterUpdate(() => {
