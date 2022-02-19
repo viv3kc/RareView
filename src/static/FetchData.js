@@ -34,11 +34,6 @@ const nft_abi = JSON.parse(`[
   }
 ]`);
 
-export function get_collection_from_opensea(collection_name) {
-  let api = "https://api.opensea.io/api/v1/collection/" + collection_name;
-  return fetch(api).then(res => res.json());
-}
-
 function get_tx_history(contract, page_key) {
   // in most cases, mint address is 0x0000000000000000000000000000000000000000
   let param_obj;

@@ -1,7 +1,8 @@
 <script>
-	import { ethers } from "ethers";
-	import { onMount, afterUpdate } from 'svelte';
-	import { get_collection_from_opensea, get_collection_assets, get_nft_meta_data } from '../static/FetchData';
+	import { afterUpdate } from 'svelte';
+	import { get_nft_meta_data } from '../static/FetchData';
+	import { get_collection_data } from '../static/CollectionManagement.js';
+	import Rarity from './Rarity.svelte';
 
 	export let contract = undefined;
 	export let collection_name = undefined;
@@ -42,57 +43,30 @@
 				"type": "function"
 			}
 	]`);
+	
+	async function structure_data() {
+		if (contract) {
+			get_contract_data(contract, token_id);
+		} else {
+			let contract_data = await get_collection_data(collection_name);
+			if (! contract_data) return;
+			if (! contract_data.hasOwnProperty("token_ids")) return;
+			if (! contract_data.hasOwnProperty("address")) return;
 
-	function get_contract_data() {
-		// fetch data from solidity contract
-	}
-
-	async function get_collection_data() {
-		// get collection data from opensea.
-		if (collection_name) {
-			let collection_obj = await get_collection_from_opensea(collection_name);
-			if (collection_obj) {
-				collection_obj = collection_obj.collection;
-				let primary_asset = collection_obj.primary_asset_contracts[0];
-				let collection_address, schema_name;
-				let collection_traits = collection_obj.traits;
-				let collection_stats = collection_obj.stats;
-				let total_collection_count = collection_stats.count;
-				if (primary_asset) {
-					collection_address = primary_asset.address;
-					schema_name = primary_asset.schema_name;
-				}
-				// for now, we only collect ERC721 collections. because the mint address is 0x000
-				if (schema_name !== "ERC721") return;
-				if (collection_address) {
-					let all_collection_ids = await get_collection_assets(collection_address, total_collection_count);
-					let all_token_data = [];
-					all_collection_ids.forEach(id => {
-						all_token_data.push(get_nft_meta_data(collection_address, id));
-					});
-					if (all_token_data.length === 0)  return;
-					let token_data = await Promise.allSettled(all_token_data);
-					let token_metadata = token_data.map(t_data => {
-						if (t_data.status === "fulfilled") {
-							let token_value = t_data.value;
-							if (token_value.hasOwnProperty("metadata")) {
-								let meta_data = token_value.metadata;
-								meta_data.id = token_value.id.tokenId;
-								return meta_data;
-							}
-						}
-					});
-				}
-			}
+			get_contract_data(contract_data.address, contract_data.token_ids);
 		}
+	}
+	async function get_contract_data(contract_address, id) {
+		// fetch data from solidity contract
+		let token_data = await get_nft_meta_data(contract_address, id);
+		let metadata = token_data.metadata;
+		metadata.id = token_data.id.tokenId;
+		metadata.address = contract_address;
+		return metadata;
 	}
 
 	afterUpdate(() => {
-		if (contract) {
-			get_contract_data();
-		} else {
-			get_collection_data();
-		}
+		structure_data();
 	});
 
 
