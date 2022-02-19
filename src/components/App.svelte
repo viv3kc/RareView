@@ -40,7 +40,7 @@
 		path.shift();
 		return path;
 	}
-	
+
 	init();
 
 	// track url changes
