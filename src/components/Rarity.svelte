@@ -1,18 +1,18 @@
-<script>
+<script lang="ts">
   import { onDestroy } from 'svelte';
-  import { collection_data } from '../static/Store.js';
+  import { collection_data } from 'src/static/Store';
 
-  export let token_id;
+  export const token_id: string = undefined;
 
   function get_rarity() {
 
   }
+
   async function generate_rarity(_collection_data) {
-    let data = await _collection_data;
+    let data: any = await _collection_data;
     if (! data) return;
     let contract = Object.keys(data)[0];
     let contract_data = data[contract];
-    console.log(contract_data)
   }
 
   const unsub_collection_data = collection_data.subscribe(c_data => {

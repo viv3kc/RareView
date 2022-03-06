@@ -1,25 +1,25 @@
-<script>
+<script lang="ts">
 	import { onMount, afterUpdate } from 'svelte';
-	import { get_data_from_chrome, chrome_data_exist, get_collection_address, store_entire_collection } from '../static/CollectionManagement.js';
+	import { get_data_from_chrome, chrome_data_exist, get_collection_address, store_entire_collection } from 'src/static/CollectionManagement';
 	import Rarity from './Rarity.svelte';
-	import { collection_data } from '../static/Store.js';
+	import { collection_data } from 'src/static/Store';
 
-	export let contract = undefined;
-	export let collection_name = undefined;
-	export let token_id = undefined;
-	
+	export let contract: string = undefined;
+	export let collection_name: string = undefined;
+	export let token_id: string = undefined;
+
 	async function generate_collection_data_from_opensea() {
 		if (contract) {
 			// check if collection already exists in chrome
 			// if not extract name from contract and store the entire collection.
-			let found_data_in_chrome = await chrome_data_exist(contract);
+			let found_data_in_chrome: boolean = await chrome_data_exist(contract);
 			if (found_data_in_chrome) return get_data_from_chrome(contract);
 			
 			// let's find the name of the collection from opensea
-			let contract_name;
+			let contract_name: string;
 			let collection_detail = document.querySelector(".item--collection-detail");
-			let collection_detail_div = collection_detail.childNodes[0];
-			let collection_div_children = collection_detail_div.childNodes;
+			let collection_detail_div = collection_detail.children[0];
+			let collection_div_children = collection_detail_div.children;
 			for (let i = 0; i < collection_div_children.length; i++) {
 				let c_node = collection_div_children[i].getAttribute('href');
 				if (c_node) {
@@ -31,9 +31,9 @@
 			store_entire_collection(contract_name);
 		} else {
 			let contract_data = await get_collection_address(collection_name);
-			let address = contract_data.address;
+			let address: string = contract_data.address;
 			// check if collection already exists in chrome
-			let found_data_in_chrome = await chrome_data_exist(address);
+			let found_data_in_chrome: boolean = await chrome_data_exist(address);
 			if (found_data_in_chrome) return get_data_from_chrome(address);
 			
 			store_entire_collection(collection_name);

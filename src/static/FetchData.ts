@@ -1,4 +1,4 @@
-const alchemy_api = "https://eth-mainnet.alchemyapi.io/v2/A8RlXYDE-mEf5JidAgy7jSkzLcnVgB3L";
+const alchemy_api: string = "https://eth-mainnet.alchemyapi.io/v2/A8RlXYDE-mEf5JidAgy7jSkzLcnVgB3L";
 const nft_abi = JSON.parse(`[
   {
     "inputs": [],
@@ -37,8 +37,8 @@ const nft_abi = JSON.parse(`[
 function get_tx_history(contract, page_key) {
   // in most cases, mint address is 0x0000000000000000000000000000000000000000
   let param_obj;
-  let mint_address = "0x0000000000000000000000000000000000000000";
-  let from_block = "0x0";
+  let mint_address: string = "0x0000000000000000000000000000000000000000";
+  let from_block: string = "0x0";
   let myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/json");
   if (page_key) {
@@ -68,7 +68,7 @@ function get_tx_history(contract, page_key) {
     };
   }
   
-  let myBody = JSON.stringify({
+  let myBody: string = JSON.stringify({
     "jsonrpc": "2.0",
     "id": 0,
     "method": "alchemy_getAssetTransfers",
@@ -85,10 +85,10 @@ function get_tx_history(contract, page_key) {
 
 export async function get_collection_assets(contract, total_collection) {
   let page_key;
-  let nft_counter = 0;
-  let token_ids = [];
+  let nft_counter: number = 0;
+  let token_ids: number[] = [];
   while(total_collection > nft_counter ) {
-    let request_options = get_tx_history(contract, page_key);
+    let request_options: any = get_tx_history(contract, page_key);
     let data = await fetch(alchemy_api, request_options).then(res => res.json());
     if (! data) return;
 
@@ -103,7 +103,7 @@ export async function get_collection_assets(contract, total_collection) {
       let transfers = result.transfers;
       nft_counter += transfers.length;
       transfers.forEach(transfer => {
-        let token_id = parseInt(transfer.tokenId)
+        let token_id: number = parseInt(transfer.tokenId)
         token_ids.push(token_id);
       });
     }
@@ -112,9 +112,9 @@ export async function get_collection_assets(contract, total_collection) {
 }
 
 export function get_nft_meta_data(contract, token_id, token_type = "erc721") {
-  const baseURL = alchemy_api + "/getNFTMetadata";
-  const url = `${baseURL}?contractAddress=${contract}&tokenId=${token_id}&tokenType=${token_type}`;
-  let requestOptions = {
+  const baseURL: string = alchemy_api + "/getNFTMetadata";
+  const url: string = `${baseURL}?contractAddress=${contract}&tokenId=${token_id}&tokenType=${token_type}`;
+  let requestOptions: any = {
     method: 'GET',
     redirect: 'follow'
   };
